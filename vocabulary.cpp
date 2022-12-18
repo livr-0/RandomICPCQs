@@ -62,22 +62,25 @@ string findStringInTrieWithPrefix(string prefix) {
   return prefix;
 }
 
-void remove(string key) {
+void removeFromTrie(string key) {
   TrieNode* current = root;
   for (const char& c : key) {
     if (current->nodes[c - 'A'] == nullptr) return; // Key not found in trie
     current = current->nodes[c - 'A'];
   }
   current->wordEnd = false;
-  if (current->childrenCount() == 0) {
-    while (current != nullptr) {
-      
+  while (current != nullptr) {
+    if (current->childrenCount() == 0) {
+      char payload = current->payload;
+      current = current->parent;
+      current->nodes[payload - 'A'] = nullptr;
     }
+    else break;
   }
 }
 
 // Remove A Specific Key String From Trie (Just Marks WordEnd As False)
-void removeFromTrie(string key) {
+void removeFromTrie2(string key) {
   TrieNode* current = root;
   TrieNode* parent = nullptr;
   size_t indexToRemoveFromParent;
@@ -125,33 +128,33 @@ int main() {
     bob.push_back(s);
   }
 
-  makeTrie(bob);
-  testTrie(root, "");
-  removeFromTrie("CANAAAL");
-  testTrie(root, "");
+  // makeTrie(bob);
+  // testTrie(root, "");
+  // removeFromTrie("THE");
+  // testTrie(root, "");
 
-  // size_t res = 0;
-  // for (const string& s : alice) {
-  //   makeTrie(bob); // Trie is created everytime as elements are removed during execution
-  //   cout << "For: " << s << endl;
-  //   size_t tempRes = 0;
-  //   for (int j = s.length(); j > 0; j--) {
-  //     cout << "At: " << s.substr(0, j) << endl;
-  //     string r = findStringInTrieWithPrefix(s.substr(0, j));
-  //     if (r != "") {
-  //       cout << "Found (" << r << ")" << endl;
-  //       removeFromTrie(r);
-  //       tempRes++;
-  //     }
-  //     else {
-  //       cout << "Not found" << endl;
-  //       if (j != s.length()) j++;
-  //       tempRes = 0;
-  //       for (const string& b : bob) root->insert(b);
-  //     }
-  //   }
-  //   res += tempRes;
-  // }
-  // cout << "Result: " << res << endl;
+  size_t res = 0;
+  for (const string& s : alice) {
+    makeTrie(bob); // Trie is created everytime as elements are removed during execution
+    cout << "For: " << s << endl;
+    size_t tempRes = 0;
+    for (int j = s.length(); j > 0; j--) {
+      cout << "At: " << s.substr(0, j) << endl;
+      string r = findStringInTrieWithPrefix(s.substr(0, j));
+      if (r != "") {
+        cout << "Found (" << r << ")" << endl;
+        removeFromTrie(r);
+        tempRes++;
+      }
+      else {
+        cout << "Not found" << endl;
+        if (j != s.length()) j++;
+        tempRes = 0;
+        for (const string& b : bob) root->insert(b);
+      }
+    }
+    res += tempRes;
+  }
+  cout << "Result: " << res << endl;
   return 0;
 }
