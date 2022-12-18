@@ -116,9 +116,7 @@ int main() {
     makeTrie(bob); // Trie is created everytime as elements are removed during execution
     cout << "For: " << s << endl;
     size_t tempRes = 0;
-    bool notFound = false;
     for (int j = s.length(); j > 0; j--) {
-      notFound = false;
       cout << "At: " << s.substr(0, j) <<  endl;
       string r = findStringInTrieWithPrefix(s.substr(0, j));
       if (r != "") {
@@ -128,8 +126,7 @@ int main() {
       }
       else {
         cout << "Not found" << endl;
-        notFound = true;
-        if (j != s.length()) j += 2;
+        if (j < s.length() - 2) j++;
         tempRes = 0;
         for (const string& b : bob) root->insert(b);
       }
