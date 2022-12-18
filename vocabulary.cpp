@@ -62,6 +62,7 @@ string findStringInTrieWithPrefix(string prefix) {
   return prefix;
 }
 
+// Remove a specific key from the trie
 void removeFromTrie(string key) {
   TrieNode* current = root;
   for (const char& c : key) {
@@ -77,24 +78,6 @@ void removeFromTrie(string key) {
     }
     else break;
   }
-}
-
-// Remove A Specific Key String From Trie (Just Marks WordEnd As False)
-void removeFromTrie2(string key) {
-  TrieNode* current = root;
-  TrieNode* parent = nullptr;
-  size_t indexToRemoveFromParent;
-  for (const char& c : key) {
-    if (current->nodes[c - 'A'] == nullptr) return; // Key not found in trie
-    if (parent == nullptr && current->childrenCount() < 2) {
-      parent = current;
-      indexToRemoveFromParent = c - 'A';
-    }
-    if (current->childrenCount() >= 2) parent = nullptr;
-    current = current->nodes[c-'A'];
-  }
-  current->wordEnd = false;
-  if (parent != nullptr) parent->nodes[indexToRemoveFromParent] = nullptr;
 }
 
 // Prints Out The Entire Trie For Testing
@@ -128,18 +111,15 @@ int main() {
     bob.push_back(s);
   }
 
-  // makeTrie(bob);
-  // testTrie(root, "");
-  // removeFromTrie("THE");
-  // testTrie(root, "");
-
   size_t res = 0;
   for (const string& s : alice) {
     makeTrie(bob); // Trie is created everytime as elements are removed during execution
     cout << "For: " << s << endl;
     size_t tempRes = 0;
+    bool notFound = false;
     for (int j = s.length(); j > 0; j--) {
-      cout << "At: " << s.substr(0, j) << endl;
+      notFound = false;
+      cout << "At: " << s.substr(0, j) <<  endl;
       string r = findStringInTrieWithPrefix(s.substr(0, j));
       if (r != "") {
         cout << "Found (" << r << ")" << endl;
@@ -148,7 +128,8 @@ int main() {
       }
       else {
         cout << "Not found" << endl;
-        if (j != s.length()) j++;
+        notFound = true;
+        if (j != s.length()) j += 2;
         tempRes = 0;
         for (const string& b : bob) root->insert(b);
       }
