@@ -1,11 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <unordered_set>
 
 using namespace std;
 
-// Trie ADT
 struct TrieNode {
   TrieNode* parent;
   TrieNode* nodes[26];
@@ -40,29 +38,8 @@ struct TrieNode {
 };
 
 TrieNode* root = new TrieNode('*', false, nullptr);
+vector<string> alice, bob;
 
-// Finds A String With Specified Prefix In The Trie (Returns Blank String If None Found)
-string findStringInTrieWithPrefix(string prefix) {
-  TrieNode* current = root;
-  for (const char& c : prefix) {
-    if (current->nodes[c - 'A'] != nullptr) current = current->nodes[c - 'A'];
-    else return "";
-  }
-  while (!current->wordEnd) {
-    TrieNode* temp = current;
-    for (size_t i = 0; i < 26; i++) {
-      if  (current->nodes[i] != nullptr) {
-        prefix += i + 'A';
-        current = current->nodes[i];
-        break;
-      }
-    }
-    if (temp == current) return "";
-  }
-  return prefix;
-}
-
-// Remove a specific key from the trie
 void removeFromTrie(string key) {
   TrieNode* current = root;
   for (const char& c : key) {
@@ -80,26 +57,39 @@ void removeFromTrie(string key) {
   }
 }
 
-// Prints Out The Entire Trie For Testing
-void testTrie(TrieNode* node, string current) {
-  cout << "Current: " << current << " | End Of Word?: " << node->wordEnd << endl;
-  for (size_t i = 0; i < 26; i++) {
-    if (node->nodes[i] != nullptr) {
-      char c = i + 'A';
-      string s(1, c);
-      testTrie(node->nodes[i], current + s);
-    }
-  }
+void makeTrie() {
+  for (const string& s : bob) root->insert(s);
 }
 
-void makeTrie(const vector<string>& v) {
-  for (const string& s : v) root->insert(s);
+string findLeastMatching(string s, char next) {
+  string temp = "";
+  TrieNode* current = root;
+  for (const char& c : s) {
+    if (current->nodes[c - 'A'] == nullptr) return "!";
+    temp += s;
+    current = current->nodes[c - 'A'];
+  }
+  if (current->wordEnd) return temp;
+  size_t nextIndex;
+  for (size_t i = 0; i < 26; i++) {
+    if (current->nodes[i] != nullptr) {
+      nextIndex = i;
+      if ((i + 'A') != next) break;
+    }
+  }
+  current = current->nodes[nextIndex];
+  while (!current->wordEnd) {
+    for (size_t i = 0; i < 26; i++) {
+      if (current->nodes[i] != nullptr) {
+        current = current->nodes[i];
+        break;
+      }
+    }
+  }
+  return temp;
 }
 
 int main() {
-  vector<string> alice, bob;
-
-  // Get Input
   size_t a, b;
   cin >> a >> b;
   while (a-- > 0) {
@@ -110,28 +100,18 @@ int main() {
     string s; cin >> s;
     bob.push_back(s);
   }
-
   size_t res = 0;
   for (const string& s : alice) {
-    makeTrie(bob); // Trie is created everytime as elements are removed during execution
-    cout << "For: " << s << endl;
-    size_t tempRes = 0;
-    for (int j = s.length(); j > 0; j--) {
-      cout << "At: " << s.substr(0, j) <<  endl;
-      string r = findStringInTrieWithPrefix(s.substr(0, j));
-      if (r != "") {
-        cout << "Found (" << r << ")" << endl;
-        removeFromTrie(r);
-        tempRes++;
-      }
+    makeTrie();
+    for (size_t i = 1; i < s.length() - 1; i++) {
+      string q = s.substr(0, i);
+      string r = findLeastMatching(q, s[i+1]);
+      if (r == "!") break;
       else {
-        cout << "Not found" << endl;
-        if (j < s.length() - 2) j++;
-        tempRes = 0;
-        for (const string& b : bob) root->insert(b);
+        removeFromTrie(r);
+        res++;
       }
     }
-    res += tempRes;
   }
   cout << "Result: " << res << endl;
   return 0;
