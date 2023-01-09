@@ -41,19 +41,20 @@ double binaryAgain(const poly& polynomial, double lBound, double hBound, double 
 
 int main() {
   cout << fixed; cout.precision(2);
-  size_t testCase = 1;
-  while (1) {
-    size_t order, volumeIncrement;
-    double xLow, xHigh, offsetVolume;
-    poly curve, antiderivative;
 
-    if (!(cin >> order)) break;
+  size_t testCase = 1, order, volumeIncrement;
+  double xLow, xHigh, offsetVolume;
+  poly curve, antiderivative;
+
+  while (cin >> order) {
+    curve.clear();
     for (size_t i = 0; i <= order ;i++) { double x; cin >> x; curve.push_back(x); }
     cin >> xLow >> xHigh >> volumeIncrement;
 
     antiderivative = getAntiderivative(squarePolynomial(curve));
-    offsetVolume = getVolume(antiderivative, xLow, 0.0);
     cout << "Case " << testCase++ << ": " << getVolume(antiderivative, xHigh, xLow) << endl;
+
+    offsetVolume = getVolume(antiderivative, xLow, 0.0);
     for (size_t i = 1; i <= 8; i++) {
       double temp = binaryAgain(antiderivative, xLow, xHigh, offsetVolume + (volumeIncrement * i));
       if (temp > xHigh - 0.01) {
