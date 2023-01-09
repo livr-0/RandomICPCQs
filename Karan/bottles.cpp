@@ -1,39 +1,17 @@
 #include <iostream>
-#include <cmath>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
-// storing polynomials as a vector of doubles
-// (index = degree, value = coefficient)
 typedef vector<double> poly;
 
-// return result of substituting specified x-value in a polynomial
 double solvePolynomial(const poly& polynomial, double x) {
   double res = 0.0;
   for (size_t i = 0; i < polynomial.size(); i++) res += polynomial[i] * pow(x, i);
   return res;
 }
 
-// return a root of a given polynomial
-double getRootOfPolynomial(const poly& polynomial, const poly& derivative) {
-  double res = 0.0, guess;
-  do {
-    guess = res;
-    res = guess - solvePolynomial(polynomial, guess) / solvePolynomial(derivative, guess);
-  } while (fabs(res - guess) >= 0.005);
-  return res;
-}
-
-// return a new polynomial integrated with respect to x
-poly getAntiderivative(const poly& polynomial) {
-  poly antiderivative;
-  antiderivative.push_back(0);
-  for (size_t i = 0; i < polynomial.size(); i++) antiderivative.push_back(polynomial[i] / (i + 1));
-  return antiderivative;
-}
-
-// return the square of a polynomial
 poly squarePolynomial(const poly& polynomial) {
   poly res;
   for (size_t i = 0; i <= (polynomial.size() - 1) * 2; i++) res.push_back(0);
@@ -43,50 +21,47 @@ poly squarePolynomial(const poly& polynomial) {
   return res;
 }
 
-// get the volume of the bottle
-double getVolume(const poly& antiderivative, double xHigh, double xLow) {
-  double area = solvePolynomial(antiderivative, xHigh) - solvePolynomial(antiderivative, xLow);
-  return area * 2 * acos(0.0);
+poly getAntiderivative(const poly& polynomial) {
+  poly antiderivative;
+  antiderivative.push_back(0);
+  for (size_t i = 0; i < polynomial.size(); i++) antiderivative.push_back(polynomial[i] / (i + 1));
+  return antiderivative;
 }
 
-// find upper bound that yields specified volume given a polynomial, its derivative, and the lower bound
-double getUpperBound(poly polynomial, const poly& derivative, double volume, double xLow) {
-  polynomial[0] = -(volume / (2 * acos(0.0)) + solvePolynomial(polynomial, xLow));
-  return getRootOfPolynomial(polynomial, derivative);
+double getVolume(const poly& polynomial, const double xHigh, const double xLow) {
+  return 2 * acos(0.0) * (solvePolynomial(polynomial, xHigh) - solvePolynomial(polynomial, xLow));
+}
+
+double binaryAgain(const poly& polynomial, double lBound, double hBound, double target) {
+  if (abs(lBound - hBound) <= 0.001) return lBound;
+  double mid = (lBound + hBound) / 2;
+  if (getVolume(polynomial, mid, 0.0) < target) return binaryAgain(polynomial, mid, hBound, target);
+  return binaryAgain(polynomial, lBound, mid, target);
 }
 
 int main() {
-  cout << fixed; cout.precision(2); // values rounded to 2 decimal places
-  size_t t = 1; // stores test case index
+  cout << fixed; cout.precision(2);
+  size_t testCase = 1;
   while (1) {
-    poly polynomial, polySquared, antiderivative;
-    vector<double> heightMarks;
-    double xHigh, xLow, volume, lastBound = 0.0;
     size_t order, volumeIncrement;
+    double xLow, xHigh, offsetVolume;
+    poly curve, antiderivative;
 
-    // get input
-    cin >> order;
-    for (size_t i = 0; i <= order; i++) {
-      double x; cin >> x;
-      polynomial.push_back(x);
-    }
+    if (!(cin >> order)) break;
+    for (size_t i = 0; i <= order ;i++) { double x; cin >> x; curve.push_back(x); }
     cin >> xLow >> xHigh >> volumeIncrement;
 
-    // process output
-    polySquared = squarePolynomial(polynomial);
-    antiderivative = getAntiderivative(polySquared);
-    volume = getVolume(antiderivative, xHigh, xLow);
-    while (heightMarks.size() < 8) {
-      double guessVal = ((xHigh - xLow) / 8) * (heightMarks.size() + 1);
-      lastBound = getUpperBound(antiderivative, polySquared, volumeIncrement, lastBound);
-      if (lastBound >= ((xHigh - xLow) - 0.01)) break;
-      heightMarks.push_back(lastBound);
+    antiderivative = getAntiderivative(squarePolynomial(curve));
+    offsetVolume = getVolume(antiderivative, xLow, 0.0);
+    cout << "Case " << testCase++ << ": " << getVolume(antiderivative, xHigh, xLow) << endl;
+    for (size_t i = 1; i <= 8; i++) {
+      double temp = binaryAgain(antiderivative, xLow, xHigh, offsetVolume + (volumeIncrement * i));
+      if (temp > xHigh - 0.01) {
+        if (i == 1) cout << "insufficient volume";
+        break;
+      }
+      cout << temp - xLow << " ";
     }
-
-    // display output
-    cout << "Case " << t++ << ": " << volume << endl;
-    if (heightMarks.size() == 0) cout << "insufficient volume";
-    else for (const double& h : heightMarks) cout << h << " ";
     cout << endl;
   }
   return 0;
