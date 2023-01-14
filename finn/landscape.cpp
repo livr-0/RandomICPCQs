@@ -11,7 +11,7 @@ struct Mod {
 int main() {
     int landSize, modCount;
     cin >> landSize >> modCount;
-    vector<int> d2(landSize + 2);
+    vector<long long> d2(landSize + 2);
     for (int i = 0; i < modCount; i++) {
         string type;
         int x1, x2;
@@ -45,13 +45,13 @@ int main() {
         }
     }
 
-    vector<int> d1(landSize + 1);
+    vector<long long> d1(landSize + 1);
     d1[0] = d2[0];
     for (int i = 1; i < landSize; i++) {
         d1[i] = d1[i - 1] + d2[i];
     }
 
-    vector<int> d(landSize);
+    vector<long long> d(landSize);
     d[0] = d1[0];
     for (int i = 1; i < landSize; i++) {
         d[i] = d[i - 1] + d1[i];
