@@ -13,8 +13,8 @@ size_t knapsack(size_t N, size_t C, vector<size_t>& W, vector<size_t>& V) {
     // determine max value obtainable by including/excluding the item
     for (size_t i = 1; i <= N; i++)
         for (size_t j = 1; j <= C; j++)
-            if (W[i] > j || dp[i-1][j] > dp[i-1][j-W[i]] + V[i]) dp[i][j] = dp[i-1][j];
-            else dp[i][j] = dp[i-1][j-W[i]] + V[i];
+            if (W[i-1] > j || dp[i-1][j] > dp[i-1][j-W[i-1]] + V[i-1]) dp[i][j] = dp[i-1][j];
+            else dp[i][j] = dp[i-1][j-W[i-1]] + V[i-1];
 
     return dp[N][C];
 }
