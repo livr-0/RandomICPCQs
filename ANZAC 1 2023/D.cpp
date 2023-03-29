@@ -1,24 +1,15 @@
 #include <iostream>
-#include <unordered_map>
-#include <tuple>
+#include <unordered_set>
 #include <queue>
+#include <tuple>
 
 using namespace std;
 
-typedef tuple<size_t, string, string> stringNode; // { distance, node, parent }
-
-struct Compare { bool operator()(stringNode& a, stringNode& b) { return get<0>(a) > get<0>(b); } };
-
-unordered_map<string, string> visited;
-priority_queue<stringNode, vector<stringNode>, Compare> frontier;
-string s2;
+unordered_set<string> visited;
+queue<pair<size_t, string>> frontier; // { pathLength, node }
 
 void rotateChar(char& c) {
     (c != 'F') ? ++c : c = 'A';
-}
-
-size_t backtrack(string node) {
-    return (visited[node] == node)? (0) : (1 + backtrack(visited[node]));
 }
 
 string clickOn(string s, size_t i) {
@@ -57,28 +48,28 @@ string clickOn(string s, size_t i) {
 }
 
 int main() {
-    string s1;
+    string s1, s2;
     cin >> s1 >> s2;
 
-    frontier.push({ 0, s1, s1 });
+    frontier.push({ 0, s1 });
 
     while (!frontier.empty()) {
-        stringNode fr = frontier.top();
+        size_t pathLength = frontier.front().first;
+        string node = frontier.front().second;
         frontier.pop();
-        string node = get<1>(fr);
-        if (visited[node] == "") {
-            visited[node] = get<2>(fr);
+        if (visited.find(node) == visited.end()) {
+            visited.insert(node);
             if (node == s2) {
-                cout << backtrack(node) << endl;
+                cout << pathLength << endl;
                 return 0;
             }
             for (size_t i = 0; i < 8; i++) {
                 string child = clickOn(node, i);
-                if (visited[child] == "") frontier.push({ 1 + get<0>(fr), child, node });
+                if (visited.find(child) == visited.end()) frontier.push({ pathLength + 1, child });
             }
         }
     }
 
-    cout << "-1" << endl;
+    cout << -1 << endl;
     return 0;
 }
