@@ -3,12 +3,10 @@
 
 using namespace std;
 
-vector<bool> mergeRows(vector<bool>& row1, vector<bool>& row2) {
-    vector<bool> merged(row1.size(), 0);
-    for (size_t i = 0; i < row1.size(); i++)
-        if (row1[i] && row2[i])
-            merged[i] = 1;
-    return merged;
+vector<bool> mergeRows(vector<bool>& r1, vector<bool>& r2) {
+    vector<bool> result(r1.size(), 0);
+    for (size_t i = 0;  i < r1.size(); i++) result[i] = r1[i] && r2[i];
+    return result;
 }
 
 int main() {
@@ -16,27 +14,27 @@ int main() {
     cin >> r >> c >> y;
     vector<vector<bool>> grid(c, vector<bool>(r, 0));
     for (size_t i = 0; i < r; i++) {
-        string s;
-        cin >> s;
+        string row;
+        cin >> row;
         for (size_t j = 0; j < c; j++)
-            if (s[j] == 'o')
+            if (row[j] == 'o')
                 grid[j][i] = 1;
     }
-    vector<vector<bool>> res(max(y, c - y), vector<bool>(r, 0));
-    if (y > c - y) {
-        size_t uppers = c - 2 * (c - y);
-        for (size_t j = 0; j < uppers; j++) res[j] = grid[j];
+    vector<vector<bool>> final(max(y, c - y), vector<bool>(r, 0));
+    if (y >= c - y) {
+        size_t leftUpper = y - (c - y);
+        for (size_t j = 0; j  < leftUpper; j++) final[j] = grid[j];
         size_t lastCol = c - 1;
-        for (size_t j = uppers; j < y; j++) res[j] = mergeRows(grid[uppers], grid[lastCol--]);
+        for (size_t j = leftUpper; j < y; j++) final[j] = mergeRows(grid[j], grid[lastCol--]);
     } else {
-        size_t uppers = c - 2 * y;
-        for (size_t j = 0; j < uppers; j++) res[j] = grid[c - j - 1];
-        size_t lastCol= c - uppers - 1;
-        for (size_t j = 0; j < y; j++) res[uppers + j] = mergeRows(grid[j], grid[lastCol--]);
+        size_t leftUpper = (c - y) - y;
+        for (size_t j = 0; j < leftUpper; j++) final[j] = grid[c - j - 1];
+        size_t lastCol = (c - 1) - leftUpper;
+        for (size_t j = leftUpper; j < c - y; j++) final[j] = mergeRows(grid[j - leftUpper], grid[lastCol--]);
     }
     for (size_t i = 0; i < r; i++) {
         for (size_t j = 0; j < max(y, c - y); j++)
-            cout << (res[j][i] ? 'o' : 'x') << " ";
+            cout << (final[j][i] ? "o" : "x");
         cout << endl;
     }
     return 0;
