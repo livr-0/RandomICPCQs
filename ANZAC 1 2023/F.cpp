@@ -13,7 +13,7 @@ struct Segment {
     coord point, vec;
     Segment(coord p1, coord p2) {
         point = p1;
-        vec = { p2.first - p1.first, p2.second - p1.second };
+        vec = coord(p2.first - p1.first, p2.second - p1.second);
     }
 };
 
@@ -37,14 +37,14 @@ struct Wire {
     bool operator<(const Wire& aOther) const { return myId < aOther.myId; }
 };
 
-map<Wire, set<Wire>> intersections;
+map<Wire, set<Wire> > intersections;
 vector<Wire> wires;
 
 bool segmentsCollide(Wire& w1, Wire& w2) {
     for (int i = 0; i < w1.points.size() - 1; i++)
         for (int j = 0; j < w2.points.size() - 1; j++) {
             Segment a(w1.points[i], w1.points[i+1]), b(w2.points[j], w2.points[j+1]);
-            coord diff = { b.point.first - a.point.first, b.point.second - a.point.second };
+            coord diff = coord(b.point.first - a.point.first, b.point.second - a.point.second);
             double crossProd = a.vec.first * b.vec.second - a.vec.second * b.vec.first;
             if (abs(crossProd) <= eps) continue;
             double t = (diff.first * b.vec.second - diff.second * b.vec.first) / crossProd;
