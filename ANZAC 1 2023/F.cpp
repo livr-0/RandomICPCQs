@@ -37,7 +37,7 @@ struct Wire {
     bool operator<(const Wire& aOther) const { return myId < aOther.myId; }
 };
 
-map<Wire, set<Wire> > intersections;
+map<Wire, set<Wire>> intersections;
 vector<Wire> wires;
 
 bool segmentsCollide(Wire& w1, Wire& w2) {
