@@ -1,61 +1,56 @@
 #include <iostream>
+#include <unordered_set>
 #include <vector>
 #include <queue>
-#include <unordered_map>
-#include <unordered_set>
 
 using namespace std;
 
-size_t n, m;
-vector<unordered_set<size_t>> lists = {};
-unordered_map<size_t, unordered_set<size_t>> routes = {};
-queue<size_t> frontier = {};
-unordered_map<size_t, size_t> parent = {};
-
-size_t traverseBack() {
-    size_t current = n, c = 0;
-    while (current != 1) {
-        current = parent[current];
-        c++;
-    }
-    return c;
-}
-
-long long bfs() {
-    frontier.push(1);
-    parent[1] = 1;
-    while (!frontier.empty()) {
-        size_t current = frontier.front();
-        frontier.pop();
-        if (current == n) return traverseBack();
-        for (const auto& child : routes[current])
-            if (!parent.count(child)) {
-                frontier.push(child);
-                parent[child] = current;
-            }
-    }
-    return -1;
-}
-
 int main() {
+    int n, m;
     cin >> n >> m;
-    for (size_t i = 1; i <= n; i++) routes[i] = {};
-    while (m--) {
-        unordered_set<size_t> list = {};
-        size_t c;
+
+    vector<unordered_set<int>> lists(m + 1);
+    vector<int> edgesListIndex(n + 1);
+
+    for (int i = 1; i <= m; i++) {
+        int c;
         cin >> c;
         while (c--) {
-            size_t x;
-            cin >> x;
-            list.insert(x);
+            int v;
+            cin >> v;
+            lists[i].insert(v);
         }
-        lists.push_back(list);
     }
-    for (size_t i = 1; i <= n; i++) {
-        size_t x;
-        cin >> x;
-        routes[i] = lists[x - 1];
+
+    for (int i = 1; i <= n; i++) {
+        cin >> edgesListIndex[i];
     }
-    cout << bfs() << endl;
+
+    unordered_set<int> seen = { 1 };
+    queue<pair<int, int>> frontier;
+    frontier.push({ 1, 0 });
+    while (frontier.size()) {
+        int node = frontier.front().first;
+        int depth = frontier.front().second;
+        frontier.pop();
+        if (node == n) {
+            cout << depth << endl;
+            return 0;
+        }
+        vector<int> edgesToRemove;
+        for (int child : lists[edgesListIndex[node]]) {
+            if (!seen.count(child)) {
+                seen.insert(child);
+                frontier.push({ child, depth + 1 });
+            } else {
+                edgesToRemove.push_back(child);
+            }
+        }
+        for (int edge : edgesToRemove) {
+            lists[edgesListIndex[node]].erase(edge);
+        }
+    }
+    cout << -1 << endl;
+
     return 0;
 }
