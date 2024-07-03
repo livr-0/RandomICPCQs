@@ -23,7 +23,7 @@ void check(vector<Coord>& coords, uint i) {
 
     for (int j = 0; j < n; j++) {
         if (j != i) {
-            // sin(C) = (a2 + b2 - c2) / 2ab
+            // cos(C) = (a2 + b2 - c2) / 2ab
             double x_to_y = coords[i].dist(coords[j]);
             double y_to_z = coords[j].dist(coords[n - 1]);
             double x_to_z = coords[i].dist(coords[n - 1]);
